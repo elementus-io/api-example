@@ -15,7 +15,7 @@ Elementus API defnition https://attribution-api.elementus.io/swagger-ui
     XAI_API_KEY=your_api_key_here
     ```
 
-3. Replace `your_api_key_here` with your actual API key and secret.
+3. Replace `your_api_key_here` with your actual API key.
 
 4. Save the `.env` file.
 
