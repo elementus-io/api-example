@@ -13,11 +13,14 @@ def get_gbq_uri():
 def get_elementus_api_key():
     return os.getenv('ELEMENTUS_API_KEY')
 
-def get_blockchain_ws_url():
-    return os.getenv('BLOCKCHAIN_WS_URL')
-
-def get_xai_api_key():
-    return os.getenv('XAI_API_KEY')
+def get_openai_api_key():
+    return os.getenv('OPENAI_API_KEY')
 
 def get_twitter_access_token():
     return os.getenv('TWITTER_ACCESS_TOKEN')
+
+def get_telegram_token():
+    return os.getenv('TELEGRAM_TOKEN')
+
+def get_telegram_channel_id():
+    return os.getenv('TELEGRAM_CHANNEL_ID')

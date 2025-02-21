@@ -1,7 +1,8 @@
 from typing import Dict, List, Optional
 from enum import IntEnum
 from pydantic import BaseModel, Field, HttpUrl
-import httpx
+from aiohttp import ClientSession, ClientTimeout
+import asyncio
 from datetime import timedelta
 
 class OFACSanctionStatus(IntEnum):
@@ -78,11 +79,23 @@ class ElementusClient:
             timeout: Request timeout in seconds
         """
         self.base_url = base_url.rstrip('/')
-        self.timeout = timeout
+        self.timeout = ClientTimeout(total=timeout)
         self.headers = {
             "X-API-Key": api_key,
             "Content-Type": "application/json"
         }
+        self._session: Optional[ClientSession] = None
+
+    async def _get_session(self) -> ClientSession:
+        """Get or create an aiohttp ClientSession."""
+        if self._session is None or self._session.closed:
+            self._session = ClientSession(timeout=self.timeout)
+        return self._session
+
+    async def close(self) -> None:
+        """Close the client session."""
+        if self._session and not self._session.closed:
+            await self._session.close()
 
     async def _make_request(
         self, 
@@ -96,7 +109,7 @@ class ElementusClient:
         Args:
             method: HTTP method
             endpoint: API endpoint
-            **kwargs: Additional arguments to pass to httpx
+            **kwargs: Additional arguments to pass to aiohttp
 
         Returns:
             Dict containing the response data
@@ -105,23 +118,17 @@ class ElementusClient:
             ElementusAPIError: If the API returns an error response
         """
         url = f"{self.base_url}{endpoint}"
+        session = await self._get_session()
         
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.request(
-                method,
-                url,
-                headers=self.headers,
-                **kwargs
-            )
-            
-            if response.is_error:
+        async with session.request(method, url, headers=self.headers, **kwargs) as response:
+            if response.status >= 400:
                 try:
-                    error_data = response.json()
+                    error_data = await response.json()
                 except ValueError:
-                    error_data = {"message": response.text}
-                raise ElementusAPIError(response.status_code, error_data)
+                    error_data = {"message": await response.text()}
+                raise ElementusAPIError(response.status, error_data)
                 
-            return response.json()
+            return await response.json()
 
     async def get_address_attributions(
         self, 
