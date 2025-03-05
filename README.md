@@ -12,7 +12,9 @@ Elementus API defnition https://attribution-api.elementus.io/swagger-ui
     ```plaintext
     GBQ_URI=<Google Big Query project URI>
     ELEMENTUS_API_KEY=your_api_key_here
-    XAI_API_KEY=your_api_key_here
+    OPENAI_API_KEY=your_api_key_here
+    TELEGRAM_TOKEN=your_api_key_here
+    TELEGRAM_CHANNEL_ID=<Telegram Channel ID>
     ```
 
 3. Replace `your_api_key_here` with your actual API key.
